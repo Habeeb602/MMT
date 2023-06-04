@@ -52,7 +52,7 @@ class UpdateSubscriberView(APIView):
     def post(self, request, format=None):
         serializer = self.serializer_class(data=request.data)
 
-        if seri
+        # if seri
 
 class SubscriptionView(generics.ListAPIView):
     queryset = Subscription.objects.all()
