@@ -1,9 +1,10 @@
 from django.shortcuts import render
+from django.db.models import Q
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Subscriber, Subscription
-from .serializers import SubscriberSerializer, CreateSubscriberSerializer, SubscriptionSerializer, CreateSubscriptionSerializer, UpdateSubscriberSerializer
+from .serializers import SubscriberSerializer, CreateSubscriberSerializer, SubscriptionSerializer, CreateSubscriptionSerializer
 # Create your views here.
 
 
@@ -47,12 +48,36 @@ class DeleteSubscriberView(APIView):
         return Response({'Error': 'Subscriber not found!!!'}, status=status.HTTP_404_NOT_FOUND)
 
 class UpdateSubscriberView(APIView):
-    serializer_class = UpdateSubscriberSerializer
+    serializer_class = CreateSubscriberSerializer
 
-    def post(self, request, format=None):
+    def patch(self, request, format=None):
+        print("Update data:", request.data)
         serializer = self.serializer_class(data=request.data)
 
-        # if seri
+        if serializer.is_valid():
+            name = serializer.data.get("name")
+            address = serializer.data.get("address")
+            phone_num = serializer.data.get("phone")
+            family_name = serializer.data.get("family_name")
+            monthly_sub_amt = serializer.data.get("monthly_sub_amt")
+            
+            if Subscriber.objects.filter(Q(phone=phone_num) & ~Q(pk=request.data['id'])).exists():
+                print(serializer)
+                return Response({"Duplicate Phone Number" : "This phone number already exists!"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            
+            subscriber = Subscriber.objects.get(pk=request.data['id'])
+            subscriber.name = name
+            subscriber.address = address
+            subscriber.phone = phone_num
+            subscriber.family_name = family_name
+            subscriber.monthly_sub_amt = monthly_sub_amt
+            subscriber.save(update_fields=["name", "address", "phone", "family_name", "monthly_sub_amt"]) 
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            print()
+            return Response({"Bad Request" : "Invalid data...\n" + serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 class SubscriptionView(generics.ListAPIView):
     queryset = Subscription.objects.all()

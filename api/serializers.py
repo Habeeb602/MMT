@@ -13,11 +13,6 @@ class CreateSubscriberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscriber
         fields = ("name", "address", "phone", "family_name", "monthly_sub_amt")
-
-class UpdateSubscriberSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subscriber
-        fields = ("id", "name", "address", "phone", "family_name", "monthly_sub_amt")
         
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:

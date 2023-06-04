@@ -58,9 +58,11 @@ const SusbcribersPage = () => {
     };
     fetch("/api/create-subscriber", requestOptions).then((response) => {
       if (response.ok) {
+        setFailureAlert("");
         setSuccessAlert("The record has been created successfully!");
         setRerender(!rerender);
       } else {
+        setSuccessAlert("");
         setFailureAlert(`Error: ${response.status}: ${response.statusText}`);
       }
     });
@@ -69,8 +71,32 @@ const SusbcribersPage = () => {
   const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
     if (!Object.keys(validationErrors).length) {
       tableData[row.index] = values;
+      console.log(values);
+      const requestOptions = {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: values.id,
+          name: values.name,
+          address: values.address === "" ? null : values.address,
+          phone: values.phone,
+          family_name: values.family_name === "" ? null : values.family_name,
+          monthly_sub_amt: values.monthly_sub_amt,
+        }),
+      };
+      // console.log(requestOptions);
+      fetch("/api/update-subscriber", requestOptions).then((response) => {
+        if (response.ok) {
+          setFailureAlert("");
+          setSuccessAlert("The record has been updated successfully!");
+          setTableData([...tableData]);
+          // setRerender(!rerender);
+        } else {
+          setSuccessAlert("");
+          setFailureAlert(`Error: ${response.status}: ${response.statusText}`);
+        }
+      });
 
-      setTableData([...tableData]);
       exitEditingMode();
     } else {
       console.log(validationErrors);
