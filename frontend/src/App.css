@@ -1,0 +1,21 @@
+.login {
+  position: absolute;
+  top: 25%;
+}
+
+.login > *:not(:last-child) {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.header {
+  background-color: #27374d;
+}
+
+.title {
+  color: white;
+  padding-left: 2.5%;
+}
+
+.navbar > * {
+}
