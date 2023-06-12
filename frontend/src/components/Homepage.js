@@ -12,10 +12,10 @@ const LinkTab = (props) => {
 function renderPage(value) {
   switch (value) {
     case 0:
-      return <SusbcribersPage />;
+      return <SusbcriptionsPage />;
 
     case 1:
-      return <SusbcriptionsPage />;
+      return <SusbcribersPage />;
 
     case 2:
       return <DonationsPage />;
@@ -41,8 +41,8 @@ const Homepage = () => {
       </Grid>
       <Grid item xs={12} className="navbar">
         <Tabs value={tabValue} onChange={handleTabChange}>
-          <LinkTab label="Subscribers" />
           <LinkTab label="Subscriptions" />
+          <LinkTab label="Subscribers" />
           <LinkTab label="Donations" />
           <LinkTab label="Expenses" />
         </Tabs>

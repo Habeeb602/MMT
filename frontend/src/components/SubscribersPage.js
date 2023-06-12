@@ -15,11 +15,11 @@ import {
   Collapse,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
-import { sampleData } from "./Sample";
+import { sampleSubscriberData } from "./Sample";
 
 const SusbcribersPage = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [tableData, setTableData] = useState([]);
+  const [tableData, setTableData] = useState(sampleSubscriberData);
   const [validationErrors, setValidationErrors] = useState({});
   const [successAlert, setSuccessAlert] = useState("");
   const [failureAlert, setFailureAlert] = useState("");
@@ -301,6 +301,7 @@ export const CreateNewAccountModal = ({ open, columns, onClose, onSubmit }) => {
 
   const handleSubmit = () => {
     //put your validation logic here
+    // console.log("Values -->");
     console.log(values);
 
     const validations = [

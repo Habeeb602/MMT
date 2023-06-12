@@ -200,7 +200,7 @@ const Example = () => {
 
 //example of creating a mui dialog modal for creating new rows
 
-export const sampleData = [
+export const sampleSubscriberData = [
   {
     id: 1,
     name: "Habeeb",
@@ -245,6 +245,30 @@ export const sampleData = [
     family_name: "Khalid Omeri & Family",
     monthly_sub_amt: 3500,
     created_at: "2023-05-30T11:01:02.694104Z",
+  },
+];
+
+export const sampleSubscriptionData = [
+  {
+    date: "2023-06-05",
+    id: 1,
+    amt: 1000,
+    remarks: "Monthly Subscription",
+    subscriber: 1,
+  },
+  {
+    date: "2023-06-05",
+    id: 2,
+    amt: 3000,
+    remarks: "General Donation",
+    subscriber: 2,
+  },
+  {
+    date: "2023-06-05",
+    id: 3,
+    amt: 1000,
+    remarks: "Paid less amount",
+    subscriber: 4,
   },
 ];
 

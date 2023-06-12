@@ -17,9 +17,9 @@ class CreateSubscriberSerializer(serializers.ModelSerializer):
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
-        fields = ("id", "amt", "remarks", "subscriber")
+        fields = ("id", "date", "amt", "remarks", "subscriber", "subscriber_name")
 
 class CreateSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
-        fields = ("amt", "remarks", "subscriber")
+        fields = ("date", "amt", "remarks", "subscriber", "subscriber_name")

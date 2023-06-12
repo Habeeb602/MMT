@@ -75,7 +75,7 @@ class UpdateSubscriberView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             print()
-            return Response({"Bad Request" : "Invalid data...\n" + serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Bad Request" : "Invalid data...\n" + str(serializer.errors)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -84,22 +84,56 @@ class SubscriptionView(generics.ListAPIView):
     serializer_class = SubscriptionSerializer
 
 
+
 class CreateSubscriptionView(APIView):
     serializer_class = CreateSubscriptionSerializer
 
     def post(self, request, format=None):
+        print(request.data)
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
+            date = serializer.data.get("date")
             amt = serializer.data.get("amt")
             remarks = serializer.data.get("remarks")
             subscriber = Subscriber.objects.filter(id = serializer.data.get("subscriber"))[0]
             
-            subscription = Subscription(amt=amt, remarks=remarks, subscriber=subscriber)
+            subscription = Subscription(date=date, amt=amt, remarks=remarks, subscriber=subscriber, subscriber_name=subscriber.name)
             subscription.save()
 
             return Response(SubscriptionSerializer(subscription).data, status=status.HTTP_200_OK)
         
-        return Response({"Bad Request" : "Invalid data..."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"Bad Request" : "Invalid data... " + str(serializer.error_messages)}, status=status.HTTP_400_BAD_REQUEST)
+
+class UpdateSubscriptionView(APIView):
+    serializer_class = CreateSubscriptionSerializer
+
+    def patch(self, request, format=None):
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            print(request.data)
+            subscription = Subscription.objects.get(pk=request.data["id"])
+            
+            subscription.date = serializer.data.get("date")
+            subscription.amt = serializer.data.get("amt")
+            subscription.remarks = serializer.data.get("remarks")
+            subscription.subscriber = Subscriber.objects.filter(id = serializer.data.get("subscriber"))[0]
+            subscription.subscriber_name = subscription.subscriber.name
+
+            subscription.save(update_fields=["date", "amt", "remarks", "subscriber", "subscriber_name"])
+            
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"Message": "Data is not valid, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteSubscriptionView(APIView):
+    
+    def post(self, request, format=None):
+        subscription = Subscription.objects.get(pk=request.data["id"])
+        if subscription is not None:
+            subscription.delete()
+            return Response({'Message': 'Success'}, status=status.HTTP_200_OK)
+        return Response({'Error': 'Subscriber not found!!!'}, status=status.HTTP_404_NOT_FOUND)
 
 

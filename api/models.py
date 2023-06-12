@@ -1,5 +1,5 @@
 from django.db import models
-
+from datetime import date
 # Create your models here.
 
 
@@ -17,8 +17,12 @@ class Subscriber(models.Model):
 
 
 class Subscription(models.Model):
+    date = models.DateField(null=False)
     amt = models.IntegerField(null=False)
     remarks = models.CharField(max_length=30, null=True)
     subscriber = models.ForeignKey(Subscriber, on_delete=models.DO_NOTHING)
+    subscriber_name = models.CharField(max_length=40, null=False, default=f"{str(subscriber.name)}")
     created_at = models.DateTimeField(auto_now_add=True)
+
+
 
