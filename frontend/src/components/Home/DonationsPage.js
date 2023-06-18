@@ -13,15 +13,18 @@ import {
   TextField,
   Alert,
   Collapse,
+  Switch,
+  FormControlLabel,
+  Typography,
 } from "@mui/material";
-import { Edit, Delete } from "@mui/icons-material";
-import { sampleSubscriptionData } from "./Sample";
-import { SelectSubscriberModal } from "./utils/SelectSubscriberModal";
-import { UpdateSubscriptionModal } from "./utils/UpdateSubscriptionModal";
+import { Edit, Delete, Person, PersonOff, CheckBox } from "@mui/icons-material";
+import { sampleDonationData } from "./Sample";
+import { SelectSubscriberModal } from "../utils/SelectSubscriberModal";
+import { UpdateDonationModal } from "../utils/UpdateDonationModal";
 
-const SusbcribersPage = () => {
+const DonationsPage = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [tableData, setTableData] = useState(sampleSubscriptionData);
+  const [tableData, setTableData] = useState([]);
   const [validationErrors, setValidationErrors] = useState({});
   const [successAlert, setSuccessAlert] = useState("");
   const [failureAlert, setFailureAlert] = useState("");
@@ -30,9 +33,9 @@ const SusbcribersPage = () => {
   const [rowData, setRowData] = useState(null);
 
   useEffect(() => {
-    const getSubscribers = async () => {
+    const getDonations = async () => {
       console.log("Came inside useEffect");
-      const response = await fetch("/api/subscription");
+      const response = await fetch("/api/donation");
       if (response.ok) {
         const jsonData = await response.json();
         console.log(`Existing Data: ${tableData}\n\nFetched Data: ${jsonData}`);
@@ -42,13 +45,10 @@ const SusbcribersPage = () => {
         console.log("Error Occurred!!! " + response);
       }
     };
-    getSubscribers().catch(console.error);
+    getDonations().catch(console.error);
   }, [rerender]);
 
   const handleCreateNewRow = (values) => {
-    tableData.push(values);
-    console.log(tableData);
-    setTableData(tableData);
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -56,17 +56,25 @@ const SusbcribersPage = () => {
         date: values.date,
         amt: parseInt(values.amt),
         remarks: values.remarks === "" ? null : values.remarks,
-        subscriber: parseInt(values.subscriber),
+        is_subscriber: values.is_subscriber,
+        donor_name: values.donor_name,
+        donor_phone: values.donor_phone === "" ? null : values.donor_phone,
       }),
     };
-    fetch("/api/create-subscription", requestOptions).then((response) => {
+    fetch("/api/create-donation", requestOptions).then((response) => {
       if (response.ok) {
         setFailureAlert("");
         setSuccessAlert("The record has been created successfully!");
+        setTimeout(() => {
+          setSuccessAlert("");
+        }, 3500);
         setRerender(!rerender);
       } else {
         setSuccessAlert("");
         setFailureAlert(`Error: ${response.status}: ${response.statusText}`);
+        setTimeout(() => {
+          setFailureAlert("");
+        }, 3500);
       }
     });
   };
@@ -80,19 +88,26 @@ const SusbcribersPage = () => {
         date: values.date,
         amt: parseInt(values.amt),
         remarks: values.remarks === "" ? null : values.remarks,
-        subscriber: parseInt(values.subscriber),
-        subscriber_name: values.subscriber_name,
+        is_subscriber: values.is_subscriber,
+        donor_name: values.donor_name,
+        donor_phone: values.donor_phone === "" ? null : values.donor_phone,
       }),
     };
 
-    fetch("/api/update-subscription", requestOptions).then((response) => {
+    fetch("/api/update-donation", requestOptions).then((response) => {
       if (response.ok) {
         setFailureAlert("");
         setSuccessAlert("The record has been updated successfully!");
         setRerender(!rerender);
+        setTimeout(() => {
+          setSuccessAlert("");
+        }, 3500);
       } else {
         setSuccessAlert("");
         setFailureAlert(`Error: ${response.status}: ${response.statusText}`);
+        setTimeout(() => {
+          setFailureAlert("");
+        }, 3500);
       }
     });
   };
@@ -112,16 +127,21 @@ const SusbcribersPage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: row.original.id,
-          name: row.original.name,
         }),
       };
 
-      fetch("/api/delete-subscription", requestOptions).then((response) => {
+      fetch("/api/delete-donation", requestOptions).then((response) => {
         if (response.ok) {
           setSuccessAlert("The record has been deleted successfully!");
           setRerender(!rerender);
+          setTimeout(() => {
+            setSuccessAlert("");
+          }, 3500);
         } else {
           setFailureAlert(`Error: ${response.status}: ${response.statusText}`);
+          setTimeout(() => {
+            setFailureAlert("");
+          }, 3500);
         }
       });
 
@@ -185,7 +205,7 @@ const SusbcribersPage = () => {
       },
       {
         accessorKey: "amt",
-        header: "Subscription amount",
+        header: "Donation amount",
         size: 140,
         muiTableBodyCellEditTextFieldProps: ({ cell }) => ({
           ...getCommonEditTextFieldProps(cell),
@@ -201,8 +221,18 @@ const SusbcribersPage = () => {
         }),
       },
       {
-        accessorKey: "subscriber",
-        header: "Subscriber ID",
+        accessorKey: "is_subscriber",
+        header: "Is Subscriber",
+        size: 120,
+        muiTableBodyCellEditTextFieldProps: ({ cell }) => ({
+          ...getCommonEditTextFieldProps(cell),
+        }),
+        Cell: ({ cell }) => (cell.getValue() ? <Person /> : <PersonOff />),
+        type: "boolean",
+      },
+      {
+        accessorKey: "donor_name",
+        header: "Donor Name",
         size: 120,
         muiTableBodyCellEditTextFieldProps: ({ cell }) => ({
           ...getCommonEditTextFieldProps(cell),
@@ -210,14 +240,13 @@ const SusbcribersPage = () => {
         type: "text",
       },
       {
-        accessorKey: "subscriber_name",
-        header: "Subscriber Name",
+        accessorKey: "donor_phone",
+        header: "Donor Phone",
         size: 120,
         muiTableBodyCellEditTextFieldProps: ({ cell }) => ({
           ...getCommonEditTextFieldProps(cell),
         }),
         type: "text",
-        enableEditing: false,
       },
     ],
     [getCommonEditTextFieldProps]
@@ -276,7 +305,7 @@ const SusbcribersPage = () => {
             onClick={() => setCreateModalOpen(true)}
             variant="contained"
           >
-            Create New Subscription
+            Create New Donation
           </Button>
         )}
       />
@@ -288,12 +317,12 @@ const SusbcribersPage = () => {
         onSubmit={handleCreateNewRow}
       />
 
-      <UpdateSubscriptionModal
+      <UpdateDonationModal
         open={updateModalOpen}
         columns={columns}
         onClose={() => setUpdateModalOpen(false)}
         row={rowData}
-        validateAmt={validateAmt}
+        validations={[validateAmt, validateDonorName]}
         onSubmit={handleUpdateRow}
       />
     </>
@@ -311,13 +340,16 @@ export const CreateNewAccountModal = ({ open, columns, onClose, onSubmit }) => {
   );
   const [selectModalOpen, setSelectModalOpen] = useState(false);
   const [rowData, setRowData] = useState(null);
+  const [subscriberSwitch, setSubscriberSwitch] = useState(false);
 
   const handleSubmit = () => {
     //put your validation logic here
+    values.is_subscriber = subscriberSwitch;
     console.log(values);
-    console.log(rowData);
-
-    const validations = [validateAmt(values.amt)];
+    const validations = [
+      validateAmt(values.amt),
+      validateDonorName(values.donor_name),
+    ];
     console.log(validations);
     for (let x of validations) {
       if (!x[0]) {
@@ -327,14 +359,14 @@ export const CreateNewAccountModal = ({ open, columns, onClose, onSubmit }) => {
     }
     onSubmit(values);
     setRowData(null);
-    values.amt = undefined;
-    values.remarks = undefined;
+    setSubscriberSwitch(false);
+    Object.keys(values).forEach((k) => (values[k] = ""));
     onClose();
   };
 
   return (
     <Dialog open={open}>
-      <DialogTitle textAlign="center">Create New Subscription</DialogTitle>
+      <DialogTitle textAlign="center">Create New Donation</DialogTitle>
       <DialogContent>
         <form onSubmit={(e) => e.preventDefault()}>
           <Stack
@@ -345,65 +377,89 @@ export const CreateNewAccountModal = ({ open, columns, onClose, onSubmit }) => {
               marginTop: "1.5%",
             }}
           >
-            {columns.map((column) => (
-              <TextField
-                InputProps={
-                  column.accessorKey === "subscriber" ||
-                  column.accessorKey === "subscriber_name"
-                    ? { readOnly: true }
-                    : {}
-                }
-                key={column.accessorKey}
-                label={
-                  column.accessorKey === "subscriber" ||
-                  column.accessorKey === "subscriber_name"
-                    ? ""
-                    : column.header
-                }
-                placeholder={
-                  column.accessorKey === "subscriber" ||
-                  column.accessorKey === "subscriber_name"
-                    ? column.header
-                    : ""
-                }
-                name={column.accessorKey}
-                type={column.type}
-                value={
-                  column.accessorKey === "subscriber" && rowData !== null
-                    ? (values.subscriber = rowData.original.id)
-                    : column.accessorKey === "amt"
-                    ? values.amt
-                    : column.accessorKey === "remarks"
-                    ? values.remarks
-                    : column.accessorKey === "subscriber_name" &&
-                      rowData !== null
-                    ? (values.subscriber_name = rowData.original.name)
-                    : undefined
-                }
-                defaultValue={
-                  column.accessorKey === "date"
-                    ? (values.date = new Date().toISOString().substring(0, 10))
-                    : undefined
-                }
-                onChange={(e) => {
-                  setValues({ ...values, [e.target.name]: e.target.value });
-                }}
-              />
-            ))}
+            {columns.map((column) =>
+              column.type === "boolean" ? (
+                <Stack
+                  sx={{ display: "inline", marginLeft: "2px" }}
+                  key={column.accessorKey}
+                >
+                  <Typography sx={{ display: "inline" }}>
+                    Is Subscriber?
+                  </Typography>
+                  <Switch
+                    checked={subscriberSwitch}
+                    onChange={(e) => {
+                      setSubscriberSwitch(!subscriberSwitch);
+                      setSelectModalOpen(!subscriberSwitch);
+                      if (subscriberSwitch) {
+                        setRowData(null);
+                      }
+                    }}
+                  />
+                </Stack>
+              ) : (
+                <TextField
+                  InputProps={
+                    column.accessorKey === "subscriber" ||
+                    column.accessorKey === "subscriber_name"
+                      ? { readOnly: true }
+                      : {}
+                  }
+                  key={column.accessorKey}
+                  label={
+                    column.accessorKey === "donor_name" ||
+                    column.accessorKey === "donor_phone"
+                      ? ""
+                      : column.header
+                  }
+                  placeholder={
+                    column.accessorKey === "donor_name" ||
+                    column.accessorKey === "donor_phone"
+                      ? column.header
+                      : ""
+                  }
+                  required={
+                    column.accessorKey === "remarks" ||
+                    column.accessorKey === "donor_phone"
+                      ? false
+                      : true
+                  }
+                  name={column.accessorKey}
+                  type={column.type}
+                  value={
+                    column.accessorKey === "donor_name" && rowData !== null
+                      ? (values.donor_name = rowData.original.name)
+                      : column.accessorKey === "donor_phone" && rowData !== null
+                      ? (values.donor_phone = rowData.original.phone)
+                      : column.accessorKey === "amt"
+                      ? values.amt
+                      : column.accessorKey === "remarks"
+                      ? values.remarks
+                      : column.accessorKey === "subscriber_name" &&
+                        rowData !== null
+                      ? (values.subscriber_name = rowData.original.name)
+                      : undefined
+                  }
+                  defaultValue={
+                    column.accessorKey === "date"
+                      ? (values.date = new Date()
+                          .toISOString()
+                          .substring(0, 10))
+                      : undefined
+                  }
+                  onChange={(e) => {
+                    setValues({ ...values, [e.target.name]: e.target.value });
+                  }}
+                />
+              )
+            )}
           </Stack>
         </form>
       </DialogContent>
       <DialogActions sx={{ p: "1.25rem" }}>
         <Button onClick={onClose}>Cancel</Button>
         <Button color="secondary" onClick={handleSubmit} variant="contained">
-          Create New Subscription
-        </Button>
-        <Button
-          color="primary"
-          onClick={() => setSelectModalOpen(true)}
-          variant="outlined"
-        >
-          Select Subscriber
+          Create New Donation
         </Button>
       </DialogActions>
       <SelectSubscriberModal
@@ -417,11 +473,20 @@ export const CreateNewAccountModal = ({ open, columns, onClose, onSubmit }) => {
 
 const validateAmt = (subAmt) => {
   let isValid = [];
-  console.log(subAmt);
   if (String(subAmt).match(/^[0-9]+$/) == null) {
-    isValid.push(false, "Please enter a valid subscription amount");
+    isValid.push(false, "Please enter a valid donation amount");
   } else if (parseInt(subAmt) <= 0) {
-    isValid.push(false, "Please enter a subscription amount greater than 0");
+    isValid.push(false, "Please enter a donation amount greater than 0");
+  } else {
+    isValid.push(true, "");
+  }
+  return isValid;
+};
+
+const validateDonorName = (dName) => {
+  let isValid = [];
+  if (String(dName).match(/^[A-Za-z ]+$/) == null) {
+    isValid.push(false, "Please enter the Donor Name!!!");
   } else {
     isValid.push(true, "");
   }
@@ -430,4 +495,4 @@ const validateAmt = (subAmt) => {
 
 const validateRequired = (value) => [true, ""];
 
-export default SusbcribersPage;
+export default DonationsPage;

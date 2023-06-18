@@ -3,8 +3,8 @@ from django.db.models import Q
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Subscriber, Subscription
-from .serializers import SubscriberSerializer, CreateSubscriberSerializer, SubscriptionSerializer, CreateSubscriptionSerializer
+from .models import Subscriber, Subscription, Donation, Expenses
+from .serializers import SubscriberSerializer, CreateSubscriberSerializer, SubscriptionSerializer, CreateSubscriptionSerializer, DonationSerializer, CreateDonationSerializer, ExpensesSerializer
 # Create your views here.
 
 
@@ -112,7 +112,6 @@ class UpdateSubscriptionView(APIView):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
-            print(request.data)
             subscription = Subscription.objects.get(pk=request.data["id"])
             
             subscription.date = serializer.data.get("date")
@@ -124,8 +123,8 @@ class UpdateSubscriptionView(APIView):
             subscription.save(update_fields=["date", "amt", "remarks", "subscriber", "subscriber_name"])
             
             return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response({"Message": "Data is not valid, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({"Message": "Data is not valid, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
 class DeleteSubscriptionView(APIView):
     
@@ -137,3 +136,106 @@ class DeleteSubscriptionView(APIView):
         return Response({'Error': 'Subscriber not found!!!'}, status=status.HTTP_404_NOT_FOUND)
 
 
+class DonationView(generics.ListAPIView):
+    queryset = Donation.objects.all()
+    serializer_class = DonationSerializer
+
+
+class CreateDonationView(APIView):
+    serializer_class = CreateDonationSerializer
+    
+    def post(self, request, format=None):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            # fields = ("date", "amt", "remarks", "is_subscriber", "donor_name", "donor_phone")
+            date = serializer.data.get("date")
+            amt = serializer.data.get("amt")
+            remarks = serializer.data.get("remarks")
+            is_subscriber = serializer.data.get("is_subscriber")
+            donor_name = serializer.data.get("donor_name")
+            donor_phone = serializer.data.get("donor_phone")
+            donation = Donation(date=date, amt=amt, remarks=remarks, is_subscriber=is_subscriber, donor_name=donor_name, donor_phone=donor_phone)
+            donation.save()
+            return Response(DonationSerializer(donation).data, status=status.HTTP_200_OK)
+        
+        return Response({"Bad Request": "Invalid data..."}, status=status.HTTP_400_BAD_REQUEST)
+
+class UpdateDonationView(APIView):
+    serializer_class = CreateDonationSerializer
+
+    def patch(self, request, format=None):
+        serializer = self.serializer_class(data=request.data)
+        
+        if serializer.is_valid():
+            donation = Donation.objects.get(pk=request.data["id"])
+            donation.date = serializer.data.get("date")
+            donation.amt = serializer.data.get("amt")
+            donation.remarks = serializer.data.get("remarks")
+            donation.is_subscriber = serializer.data.get("is_subscriber")
+            donation.donor_name = serializer.data.get("donor_name")
+            donation.donor_phone = serializer.data.get("donor_phone")
+            
+            donation.save(update_fields=["date", "amt", "remarks", "is_subscriber", "donor_name", "donor_phone"])
+
+            return Response(CreateDonationSerializer(donation).data, status=status.HTTP_200_OK)
+        
+        print(serializer.error_messages)
+        return Response({"Message": "Data is not valid, please try again"}, status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteDonationView(APIView):
+
+    def post(self, request, format=None):
+        donation = Donation.objects.get(pk=request.data["id"])
+        if donation is not None:
+            donation.delete()
+            return Response({"Message": "Success!!!"}, status=status.HTTP_200_OK)
+        return Response({"Message": "Bad Request!!!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ExpensesView(generics.ListAPIView):
+    queryset = Expenses.objects.all()
+    serializer_class = ExpensesSerializer
+
+
+class CreateExpensesView(APIView):
+    serializer_class = ExpensesSerializer
+    
+    def post(self, request, format=None):
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            date = serializer.data.get("date")
+            amt = serializer.data.get("amt")
+            type = serializer.data.get("type")
+            remarks = serializer.data.get("remarks")
+            expenses = Expenses(date=date, amt=amt, type=type, remarks=remarks)
+            expenses.save()
+            return Response(ExpensesSerializer(expenses).data, status=status.HTTP_200_OK)
+        print(serializer)
+        return Response({"Bad Request": "The data is not valid, please check!!!"}, status=status.HTTP_400_BAD_REQUEST)
+
+class UpdateExpensesView(APIView):
+    serializer_class = ExpensesSerializer
+
+    def patch(self, request, format=None):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            expenses = Expenses.objects.get(pk=request.data["id"])
+            expenses.date = serializer.data.get("date")
+            expenses.amt = serializer.data.get("amt")
+            expenses.type = serializer.data.get("type")
+            expenses.remarks = serializer.data.get("remarks")
+
+            expenses.save(update_fields=["date", "amt", "type", "remarks"])
+            return Response(ExpensesSerializer(expenses).data, status=status.HTTP_200_OK)
+        print(serializer)
+        return Response({"Bad Request": "The data is not valid, please check!!!"}, status=status.HTTP_400_BAD_REQUEST)
+
+class DeleteExpensesView(APIView):
+    
+    def post(self, request, format=None):
+        expenses = Expenses.objects.get(pk=request.data["id"])
+        if expenses is not None:
+            expenses.delete()
+            return Response({"Message": "Success!!!"}, status=status.HTTP_200_OK)
+        return Response({"Message": "Bad Request!!!"}, status=status.HTTP_400_BAD_REQUEST)

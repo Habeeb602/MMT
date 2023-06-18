@@ -272,6 +272,44 @@ export const sampleSubscriptionData = [
   },
 ];
 
+export const sampleDonationData = [
+  {
+    id: 1,
+    date: "2023-06-12",
+    amt: 2000,
+    remarks: "General Donation",
+    is_subscriber: false,
+    donor_name: "Habeeb",
+    donor_phone: "8754326172",
+  },
+  {
+    id: 2,
+    date: "2023-06-13",
+    amt: 3000,
+    remarks: "For Maintainence",
+    is_subscriber: true,
+    donor_name: "Naina",
+    donor_phone: "8754329172",
+  },
+];
+
+export const sampleExpensesData = [
+  {
+    id: 1,
+    date: "2023-06-15",
+    amt: 2000,
+    type: "Maintanence/Service",
+    remarks: "UPS Service",
+  },
+  {
+    id: 2,
+    date: "2023-06-13",
+    amt: 5000,
+    type: "Maintanence/Service",
+    remarks: "Speaker & MicSet Service",
+  },
+];
+
 export const CreateNewAccountModal = ({ open, columns, onClose, onSubmit }) => {
   const [values, setValues] = useState(() =>
     columns.reduce((acc, column) => {

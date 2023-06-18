@@ -25,4 +25,22 @@ class Subscription(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+class Donation(models.Model):
+    date = models.DateField(null=False)
+    amt = models.IntegerField(null=False)
+    remarks = models.CharField(max_length=30, null=True)
+    is_subscriber = models.BooleanField(null=False, default=False)
+    donor_name = models.CharField(max_length=30, null=False)
+    donor_phone = models.CharField(max_length=10, null = True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Expenses(models.Model):
+    date = models.DateField(null=False)
+    amt = models.IntegerField(null=False)
+    type = models.CharField(max_length=30, null=False)
+    remarks = models.CharField(max_length=30, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 

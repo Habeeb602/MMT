@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { sampleSubscriberData } from "../Sample";
+// import { sampleSubscriberData } from "../Sample";
 import { SelectSubscriberModal } from "./SelectSubscriberModal";
 import {
   Dialog,

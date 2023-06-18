@@ -12,10 +12,10 @@ const LinkTab = (props) => {
 function renderPage(value) {
   switch (value) {
     case 0:
-      return <SusbcriptionsPage />;
+      return <SusbcribersPage />;
 
     case 1:
-      return <SusbcribersPage />;
+      return <SusbcriptionsPage />;
 
     case 2:
       return <DonationsPage />;
@@ -35,14 +35,11 @@ const Homepage = () => {
   };
 
   return (
-    <Grid container spacing={1}>
-      <Grid item xs={12} className="header">
-        <h2 className="title">Masjid Markaz Thowheedullah</h2>
-      </Grid>
+    <Grid container spacing={1} sx={{ marginTop: "4rem" }}>
       <Grid item xs={12} className="navbar">
         <Tabs value={tabValue} onChange={handleTabChange}>
-          <LinkTab label="Subscriptions" />
           <LinkTab label="Subscribers" />
+          <LinkTab label="Subscriptions" />
           <LinkTab label="Donations" />
           <LinkTab label="Expenses" />
         </Tabs>

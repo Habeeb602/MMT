@@ -16,14 +16,17 @@ import {
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { sampleSubscriberData } from "./Sample";
+import { UpdateSubscriberModal } from "../utils/UpdateSubscriberModal";
 
 const SusbcribersPage = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [tableData, setTableData] = useState(sampleSubscriberData);
+  const [tableData, setTableData] = useState([]);
   const [validationErrors, setValidationErrors] = useState({});
   const [successAlert, setSuccessAlert] = useState("");
   const [failureAlert, setFailureAlert] = useState("");
   const [rerender, setRerender] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [rowData, setRowData] = useState(null);
 
   useEffect(() => {
     const getSubscribers = async () => {
@@ -61,46 +64,48 @@ const SusbcribersPage = () => {
         setFailureAlert("");
         setSuccessAlert("The record has been created successfully!");
         setRerender(!rerender);
+        setTimeout(() => {
+          setSuccessAlert("");
+        }, 3500);
       } else {
         setSuccessAlert("");
         setFailureAlert(`Error: ${response.status}: ${response.statusText}`);
+        setTimeout(() => {
+          setFailureAlert("");
+        }, 3500);
       }
     });
   };
 
-  const handleSaveRowEdits = async ({ exitEditingMode, row, values }) => {
-    if (!Object.keys(validationErrors).length) {
-      tableData[row.index] = values;
-      console.log(values);
-      const requestOptions = {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: values.id,
-          name: values.name,
-          address: values.address === "" ? null : values.address,
-          phone: values.phone,
-          family_name: values.family_name === "" ? null : values.family_name,
-          monthly_sub_amt: values.monthly_sub_amt,
-        }),
-      };
-      // console.log(requestOptions);
-      fetch("/api/update-subscriber", requestOptions).then((response) => {
-        if (response.ok) {
-          setFailureAlert("");
-          setSuccessAlert("The record has been updated successfully!");
-          setTableData([...tableData]);
-          // setRerender(!rerender);
-        } else {
-          setSuccessAlert("");
-          setFailureAlert(`Error: ${response.status}: ${response.statusText}`);
-        }
-      });
+  const handleUpdateRow = (values) => {
+    const request = {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: values.name,
+        address: values.address === "" ? null : values.address,
+        phone: values.phone,
+        family_name: values.family_name,
+        monthly_sub_amt: values.monthly_sub_amt,
+      }),
+    };
 
-      exitEditingMode();
-    } else {
-      console.log(validationErrors);
-    }
+    fetch("/api/update-subscriber", request).then((response) => {
+      if (response.ok) {
+        setFailureAlert("");
+        setSuccessAlert("The record has been updated successfully!");
+        setRerender(!rerender);
+        setTimeout(() => {
+          setSuccessAlert("");
+        }, 3500);
+      } else {
+        setSuccessAlert("");
+        setFailureAlert(`Error: ${response.status}: ${response.statusText}`);
+        setTimeout(() => {
+          setFailureAlert("");
+        }, 3500);
+      }
+    });
   };
 
   const handleCancelRowEdits = () => {
@@ -126,8 +131,14 @@ const SusbcribersPage = () => {
         if (response.ok) {
           setSuccessAlert("The record has been deleted successfully!");
           setRerender(!rerender);
+          setTimeout(() => {
+            setSuccessAlert("");
+          }, 3500);
         } else {
           setFailureAlert(`Error: ${response.status}: ${response.statusText}`);
+          setTimeout(() => {
+            setFailureAlert("");
+          }, 3500);
         }
       });
 
@@ -190,6 +201,7 @@ const SusbcribersPage = () => {
         muiTableBodyCellEditTextFieldProps: ({ cell }) => ({
           ...getCommonEditTextFieldProps(cell),
         }),
+        type: "text",
       },
       {
         accessorKey: "address",
@@ -198,6 +210,7 @@ const SusbcribersPage = () => {
         muiTableBodyCellEditTextFieldProps: ({ cell }) => ({
           ...getCommonEditTextFieldProps(cell),
         }),
+        type: "text",
       },
       {
         accessorKey: "phone",
@@ -214,14 +227,15 @@ const SusbcribersPage = () => {
         muiTableBodyCellEditTextFieldProps: ({ cell }) => ({
           ...getCommonEditTextFieldProps(cell),
         }),
+        type: "text",
       },
       {
         accessorKey: "monthly_sub_amt",
         header: "Subscription Amount",
         muiTableBodyCellEditTextFieldProps: ({ cell }) => ({
           ...getCommonEditTextFieldProps(cell),
-          type: "number",
         }),
+        type: "number",
       },
     ],
     [getCommonEditTextFieldProps]
@@ -254,12 +268,16 @@ const SusbcribersPage = () => {
         editingMode="modal" //default
         enableColumnOrdering
         enableEditing
-        onEditingRowSave={handleSaveRowEdits}
         onEditingRowCancel={handleCancelRowEdits}
         renderRowActions={({ row, table }) => (
           <Box sx={{ display: "flex", gap: "1rem" }}>
             <Tooltip arrow placement="left" title="Edit">
-              <IconButton onClick={() => table.setEditingRow(row)}>
+              <IconButton
+                onClick={() => {
+                  setRowData(row);
+                  setUpdateModalOpen(true);
+                }}
+              >
                 <Edit />
               </IconButton>
             </Tooltip>
@@ -286,6 +304,14 @@ const SusbcribersPage = () => {
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onSubmit={handleCreateNewRow}
+      />
+      <UpdateSubscriberModal
+        columns={columns}
+        open={updateModalOpen}
+        onClose={() => setUpdateModalOpen(false)}
+        onSubmit={handleUpdateRow}
+        validations={[validateName, validatePhoneNumber, validateSubAmt]}
+        row={rowData}
       />
     </>
   );
@@ -335,6 +361,14 @@ export const CreateNewAccountModal = ({ open, columns, onClose, onSubmit }) => {
           >
             {columns.map((column) => (
               <TextField
+                required={
+                  column.accessorKey === "name" ||
+                  column.accessorKey === "phone" ||
+                  column.accessorKey === "monthly_sub_amt"
+                    ? true
+                    : false
+                }
+                type={column.type}
                 key={column.accessorKey}
                 label={column.header}
                 name={column.accessorKey}

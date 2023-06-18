@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { sampleSubscriberData } from "../Sample";
+import { sampleSubscriberData } from "../Home/Sample";
 import {
   Dialog,
   DialogTitle,
@@ -19,7 +19,7 @@ export const SelectSubscriberModal = ({
   onSubmit,
   setRowData,
 }) => {
-  const [subscriberData, setSubscriberData] = useState(sampleSubscriberData);
+  const [subscriberData, setSubscriberData] = useState([]);
 
   useEffect(() => {
     const getSubscribers = async () => {

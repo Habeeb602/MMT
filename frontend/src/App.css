@@ -17,5 +17,6 @@
   padding-left: 2.5%;
 }
 
-.navbar > * {
+.navbar {
+  display: block;
 }
